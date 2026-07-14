@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Lora:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Lora', serif;
+  background-color: #0A1628;
+  color: #F1F5F9;
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #112240;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+input, textarea, select {
+  font-family: 'Lora', serif;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 bg-amber text-midnight font-semibold rounded-lg hover:bg-amberLight transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-2.5 bg-midnightLight border border-slate text-textPrimary rounded-lg hover:border-amber hover:text-amber transition-all duration-300;
+  }
+  
+  .btn-ghost {
+    @apply px-4 py-2 text-textSecondary hover:text-amber transition-colors duration-300;
+  }
+  
+  .card {
+    @apply bg-midnightLight rounded-xl p-6 border border-slate/30 hover:border-amber/30 transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-midnight border border-slate rounded-lg text-textPrimary placeholder-textMuted focus:border-amber transition-colors duration-300;
+  }
+  
+  .section-title {
+    @apply text-2xl font-display font-semibold text-textPrimary mb-6;
+  }
+}
