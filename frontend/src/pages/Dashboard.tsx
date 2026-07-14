@@ -50,7 +50,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (currentProject) {
-      api.ai.getPlotSuggestions(currentProject.id).then(setPlotSuggestions);
+      api.ai.getPlotSuggestions(currentProject.genre, '').then(setPlotSuggestions);
     }
   }, [currentProject]);
 

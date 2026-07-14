@@ -338,10 +338,11 @@ export const api = {
       }) as AICharacterResponse;
     },
     polishDialog: async (data: AIDialogRequest): Promise<AIDialogResponse> => {
-      return await callAI('polishDialog', {
+      const result = await callAI('polishDialog', {
         text: data.text,
         style: data.style,
-      }) as AIDialogResponse;
+      }) as { content: string };
+      return { rewrittenText: result.content || '' };
     },
     generateAtmosphere: async (data: AIAtmosphereRequest): Promise<AIAtmosphereResponse> => {
       return await callAI('generateAtmosphere', {
@@ -356,11 +357,8 @@ export const api = {
         })),
       }) as AIConflictResponse;
     },
-    getPlotSuggestions: async (_projectId: string): Promise<PlotSuggestion[]> => {
-      const result = await callAI('suggestPlot', {
-        genre: '商业片',
-        currentPlot: '',
-      }) as Array<{ type: string; title: string; description: string }>;
+    getPlotSuggestions: async (genre: string, currentPlot: string): Promise<PlotSuggestion[]> => {
+      const result = await callAI('suggestPlot', { genre, currentPlot }) as Array<{ type: string; title: string; description: string }>;
       return result.map((item, index) => ({
         id: `plot-${Date.now()}-${index}`,
         type: item.type as PlotSuggestion['type'],
@@ -368,6 +366,20 @@ export const api = {
         description: item.description,
         probability: 0.7,
       }));
+    },
+    generateOutline: async (data: { title: string; genre: string; structure: string; premise?: string }): Promise<Array<{
+      title: string; location: string; timeOfDay: string; characters: string[]; content: string; order: number;
+    }>> => {
+      return await callAI('generateOutline', data) as Array<{
+        title: string; location: string; timeOfDay: string; characters: string[]; content: string; order: number;
+      }>;
+    },
+    generateSceneContent: async (data: {
+      title: string; genre: string; sceneTitle: string; location: string;
+      timeOfDay: string; characters: string[]; summary: string; previousScene?: string; nextScene?: string;
+    }): Promise<string> => {
+      const result = await callAI('generateSceneContent', data) as { content: string };
+      return result.content || '';
     },
   },
   analytics: {

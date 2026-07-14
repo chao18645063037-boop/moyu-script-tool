@@ -14,7 +14,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   if (request.method === 'GET') {
-    return new Response(JSON.stringify({ ok: true, message: '墨韵 AI API is running', version: '1.0.0' }), {
+    return new Response(JSON.stringify({ ok: true, message: '墨韵 AI API is running', version: '2.0.0' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
     });
