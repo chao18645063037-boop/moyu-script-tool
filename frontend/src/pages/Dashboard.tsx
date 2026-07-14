@@ -60,19 +60,14 @@ const Dashboard = () => {
     setIsCreating(true);
     setCreateError('');
     try {
-      const result = await dispatch(createProject({ title, genre: selectedGenre, structure: selectedStructure }));
-      if (createProject.fulfilled.match(result)) {
-        setShowCreateModal(false);
-        setNewProjectTitle('');
-        setSelectedGenre('commercial');
-        setSelectedStructure('three_act');
-      } else {
-        const msg = typeof result.payload === 'string' ? result.payload : JSON.stringify(result.payload);
-        setCreateError(msg || '创建失败');
-      }
+      await dispatch(createProject({ title, genre: selectedGenre, structure: selectedStructure })).unwrap();
+      setShowCreateModal(false);
+      setNewProjectTitle('');
+      setSelectedGenre('commercial');
+      setSelectedStructure('three_act');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      setCreateError(`创建失败：${msg}`);
+      setCreateError(msg);
     } finally {
       setIsCreating(false);
     }
