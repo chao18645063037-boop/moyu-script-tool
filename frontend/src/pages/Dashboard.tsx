@@ -58,7 +58,6 @@ const Dashboard = () => {
     if (createProject.fulfilled.match(result)) {
       setShowCreateModal(false);
       setNewProjectTitle('');
-      navigate(`/editor/${result.payload.id}`);
     }
   };
 

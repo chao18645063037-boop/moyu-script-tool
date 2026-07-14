@@ -244,6 +244,7 @@ export const api = {
         createdAt: new Date(),
         updatedAt: new Date(),
       };
+      mockProjects.unshift(newProject);
       return newProject;
     },
     update: async (id: string, data: Partial<Project>): Promise<Project> => {
