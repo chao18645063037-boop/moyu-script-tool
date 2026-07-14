@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import type { IncomingMessage, ServerResponse } from 'http'
-import { handleAi } from '../api/handler'
+import { handleAi } from './api/handler'
 
 function apiMiddleware() {
   return {
