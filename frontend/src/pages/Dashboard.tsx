@@ -67,10 +67,12 @@ const Dashboard = () => {
         setSelectedGenre('commercial');
         setSelectedStructure('three_act');
       } else {
-        setCreateError((result.payload as string) || '创建失败');
+        const msg = typeof result.payload === 'string' ? result.payload : JSON.stringify(result.payload);
+        setCreateError(msg || '创建失败');
       }
-    } catch {
-      setCreateError('创建失败，请重试');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setCreateError(`创建失败：${msg}`);
     } finally {
       setIsCreating(false);
     }

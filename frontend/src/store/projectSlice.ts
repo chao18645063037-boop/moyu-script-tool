@@ -46,9 +46,13 @@ export const createProject = createAsyncThunk(
   'projects/create',
   async (data: { title: string; genre: Genre; structure: Structure }, { rejectWithValue }) => {
     try {
-      return await api.projects.create(data);
+      console.log('[createProject] dispatching with data:', data);
+      const result = await api.projects.create(data);
+      console.log('[createProject] result:', result);
+      return result;
     } catch (error) {
-      return rejectWithValue('创建项目失败');
+      console.error('[createProject] error:', error);
+      return rejectWithValue(error instanceof Error ? error.message : '创建项目失败');
     }
   }
 );
