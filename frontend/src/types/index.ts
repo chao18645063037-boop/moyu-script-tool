@@ -118,6 +118,7 @@ export interface AIAtmosphereResponse {
 
 export interface AIConflictRequest {
   characterIds: string[];
+  characters: { name: string; relationship: string }[];
 }
 
 export interface AIConflictResponse {

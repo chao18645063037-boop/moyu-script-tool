@@ -12,6 +12,7 @@ import ConflictLab from './pages/ConflictLab';
 import Analytics from './pages/Analytics';
 import Community from './pages/Community';
 import Achievements from './pages/Achievements';
+import Settings from './pages/Settings';
 import { setToken } from './store/authSlice';
 import type { RootState } from './store';
 import { useAppDispatch } from './hooks/useAppDispatch';
@@ -133,6 +134,16 @@ function App() {
                 <ProtectedRoute>
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
                     <Achievements />
+                  </motion.div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }}>
+                    <Settings />
                   </motion.div>
                 </ProtectedRoute>
               }

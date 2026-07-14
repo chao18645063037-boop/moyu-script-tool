@@ -22,6 +22,7 @@ import type {
   Genre,
   Structure,
 } from '../types';
+import { getConfig } from '../utils/config';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -180,11 +181,31 @@ const mockUserAchievements: UserAchievement[] = [
   { id: 'ua-3', userId: 'user-1', achievementId: 'ach-4', unlockedAt: undefined, progress: 12 },
 ];
 
-const mockPlotSuggestions: PlotSuggestion[] = [
-  { id: 'plot-1', type: 'surprise', title: '意外访客', description: '一个意想不到的人物突然出现，打乱了主角的计划', probability: 0.75 },
-  { id: 'plot-2', type: 'emotional', title: '回忆杀', description: '主角看到某个物品，触发一段关键的回忆', probability: 0.65 },
-  { id: 'plot-3', type: 'reveal', title: '身份揭露', description: '反派的真实身份被揭开，原来就在身边', probability: 0.8 },
-];
+async function callAI(action: string, params: Record<string, unknown>): Promise<unknown> {
+  const config = getConfig();
+  if (!config) {
+    throw new Error('请先在设置页面配置 AI 模型 API Key');
+  }
+
+  const res = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action,
+      apiKey: config.apiKey,
+      provider: config.provider,
+      params,
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.error || 'AI 请求失败');
+  }
+
+  return data.data;
+}
 
 export const api = {
   auth: {
@@ -307,90 +328,45 @@ export const api = {
   },
   ai: {
     generateCharacter: async (data: AICharacterRequest): Promise<AICharacterResponse> => {
-      await delay(1500);
-      const backstories = [
-        `出生于${data.occupation}世家，从小耳濡目染。年轻时曾有机会离开这个行业，但最终选择坚守初心。`,
-        `原本从事完全不同的职业，一次偶然的机会让他接触到${data.occupation}，从此一发不可收拾。`,
-        `${data.name}的${data.occupation}之路并不顺利，经历了无数次失败和挫折，但从未放弃。`,
-      ];
-      const motivations = [
-        `对${data.occupation}的热爱是${data.name}前进的动力，他渴望创造出真正有价值的作品。`,
-        `证明自己的能力，让那些曾经质疑他的人刮目相看。`,
-        `寻找人生的意义，在${data.occupation}中找到自我价值。`,
-      ];
-      const arcs = [
-        `从一个迷茫的初学者成长为行业内备受尊敬的${data.occupation}。`,
-        `学会了在追求事业的同时，也要珍惜身边的人和感情。`,
-        `克服了内心的恐惧和不安，变得更加自信和坚定。`,
-      ];
-      const catchphrases = [
-        `这就是我的使命。`,
-        `只要还能创作，就不会停止。`,
-        `相信直觉，跟随内心。`,
-      ];
-      return {
-        backstory: backstories[Math.floor(Math.random() * backstories.length)],
-        motivation: motivations[Math.floor(Math.random() * motivations.length)],
-        arc: arcs[Math.floor(Math.random() * arcs.length)],
-        catchphrase: catchphrases[Math.floor(Math.random() * catchphrases.length)],
-      };
+      return await callAI('generateCharacter', {
+        name: data.name,
+        age: data.age,
+        gender: data.gender,
+        occupation: data.occupation,
+        personality: data.personality,
+      }) as AICharacterResponse;
     },
     polishDialog: async (data: AIDialogRequest): Promise<AIDialogResponse> => {
-      await delay(1000);
-      const styles: Record<string, (text: string) => string> = {
-        humorous: (text) => `${text}（嘴角上扬，眼神中带着一丝戏谑）`,
-        subtle: (text) => `${text}（声音轻得几乎听不见，却带着不容置疑的坚定）`,
-        powerful: (text) => `${text}！（声音在空旷的空间里回荡，每一个字都像锤子一样砸在人心上）`,
-        professional: (text) => `「${text}」——语气平稳，条理清晰，不带任何个人情绪。`,
-      };
-      return { rewrittenText: styles[data.style](data.text) };
+      return await callAI('polishDialog', {
+        text: data.text,
+        style: data.style,
+      }) as AIDialogResponse;
     },
     generateAtmosphere: async (data: AIAtmosphereRequest): Promise<AIAtmosphereResponse> => {
-      await delay(1200);
-      const atmosphereMap: Record<string, { description: string; visualMetaphor: string }> = {
-        '废弃医院': {
-          description: '惨白的月光透过破碎的窗户洒进来，在斑驳的墙壁上投下诡异的阴影。走廊尽头传来滴水声，像是某种古老的节拍。空气里弥漫着消毒水和腐烂的混合气味。',
-          visualMetaphor: '时间在这里凝固，只有幽灵在低语。',
-        },
-        '雨天咖啡馆': {
-          description: '窗外的雨丝细密如织，打在玻璃上形成一道道水痕。咖啡馆内温暖的灯光与窗外的冷色调形成鲜明对比。爵士乐在空气中流淌，与雨声交织成一首温柔的交响曲。',
-          visualMetaphor: '在喧嚣世界中找到的一片宁静港湾。',
-        },
-        '繁华都市夜景': {
-          description: '霓虹灯闪烁不定，像无数双眼睛在黑暗中窥视。车流汇成光的河流，在高楼大厦之间穿梭。远处传来隐约的警笛声，为这座不夜城增添了一丝紧张感。',
-          visualMetaphor: '一座由欲望和梦想堆砌而成的巴比伦塔。',
-        },
-        '宁静乡村': {
-          description: '夕阳的余晖将田野染成金黄色，微风拂过麦浪，发出沙沙的声响。远处的炊烟袅袅升起，与天边的云霞融为一体。偶尔传来几声蝉鸣，更显这片土地的宁静。',
-          visualMetaphor: '时间在这里放慢了脚步，生活回归最本真的模样。',
-        },
-      };
-      const key = data.keywords[0] || '未知场景';
-      const result = atmosphereMap[key] || {
-        description: '场景氛围独特，充满了故事性。光影交错之间，似乎隐藏着无数秘密。',
-        visualMetaphor: '每一个角落都在诉说着自己的故事。',
-      };
-      return result;
+      return await callAI('generateAtmosphere', {
+        keywords: data.keywords,
+      }) as AIAtmosphereResponse;
     },
-    suggestConflict: async (_data: AIConflictRequest): Promise<AIConflictResponse> => {
-      await delay(1000);
-      return {
-        conflicts: [
-          '两人因为理念不合发生激烈争吵，关系濒临破裂。',
-          '一方发现了另一方隐藏已久的秘密，信任彻底崩塌。',
-          '外部威胁迫使两人必须合作，但过去的恩怨让合作充满张力。',
-        ],
-        escalationPath: [
-          '表面的和平被打破，矛盾开始显现',
-          '小摩擦升级为公开冲突',
-          '秘密被揭露，关系降至冰点',
-          '最终摊牌，决定彼此的命运',
-        ],
-      };
+    suggestConflict: async (data: AIConflictRequest): Promise<AIConflictResponse> => {
+      return await callAI('suggestConflict', {
+        characters: data.characters.map((c: { name: string; relationship: string }) => ({
+          name: c.name,
+          relationship: c.relationship,
+        })),
+      }) as AIConflictResponse;
     },
     getPlotSuggestions: async (_projectId: string): Promise<PlotSuggestion[]> => {
-      await delay(800);
-      return mockPlotSuggestions;
+      const result = await callAI('suggestPlot', {
+        genre: '商业片',
+        currentPlot: '',
+      }) as Array<{ type: string; title: string; description: string }>;
+      return result.map((item, index) => ({
+        id: `plot-${Date.now()}-${index}`,
+        type: item.type as PlotSuggestion['type'],
+        title: item.title,
+        description: item.description,
+        probability: 0.7,
+      }));
     },
   },
   analytics: {

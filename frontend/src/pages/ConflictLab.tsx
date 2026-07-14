@@ -64,7 +64,18 @@ const ConflictLab = () => {
   const handleGenerateConflicts = async () => {
     if (selectedCharacters.length < 2) return;
     setIsGenerating(true);
-    const result = await api.ai.suggestConflict({ characterIds: selectedCharacters });
+    const charDetails = selectedCharacters.map(id => {
+      const char = characters.find(c => c.id === id);
+      const rel = characterRelationships.find(r =>
+        (r.characterId1 === id || r.characterId2 === id) &&
+        selectedCharacters.some(sc => sc !== id && (sc === r.characterId1 || sc === r.characterId2))
+      );
+      return {
+        name: char?.name || '未知',
+        relationship: rel ? relationshipTypes.find(t => t.value === rel.type)?.label || '未知关系' : '未知关系',
+      };
+    });
+    const result = await api.ai.suggestConflict({ characterIds: selectedCharacters, characters: charDetails });
     setAiConflicts(result.conflicts);
     setEscalationPath(result.escalationPath);
     setIsGenerating(false);

@@ -11,6 +11,7 @@ import {
   Trophy,
   User,
   LogOut,
+  Settings,
 } from 'lucide-react';
 import { logout } from '../../store/authSlice';
 import type { RootState } from '../../store';
@@ -24,6 +25,7 @@ const menuItems = [
   { path: '/analytics', icon: BarChart3, label: '数据分析' },
   { path: '/community', icon: Globe, label: '社区广场' },
   { path: '/achievements', icon: Trophy, label: '成就中心' },
+  { path: '/settings', icon: Settings, label: 'AI 配置' },
 ];
 
 const Sidebar = () => {
