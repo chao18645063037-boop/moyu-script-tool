@@ -127,17 +127,19 @@ const Editor = () => {
     setIsGenerating(true);
     setGeneratingStatus('正在为您的故事设计场景大纲...');
     setOutlineScenes([]);
-    setShowOutlinePanel(true);
     try {
-      const scenes = await api.ai.generateOutline({
+      console.log('[Outline] calling generateOutline...');
+      const result = await api.ai.generateOutline({
         title: currentProject.title,
         genre: currentProject.genre,
         structure: currentProject.structure,
         premise: premise || undefined,
       });
-      setOutlineScenes(scenes);
+      console.log('[Outline] result:', result);
+      setOutlineScenes(result);
       setGeneratingStatus('');
     } catch (err) {
+      console.error('[Outline] error:', err);
       setGeneratingStatus('生成失败：' + (err instanceof Error ? err.message : '未知错误'));
     } finally {
       setIsGenerating(false);
@@ -450,26 +452,25 @@ const Editor = () => {
       </div>
 
       {/* Outline panel */}
-      <AnimatePresence>
-        {showOutlinePanel && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowOutlinePanel(false)}>
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl max-h-[85vh] bg-midnightLight rounded-xl border border-slate/30 flex flex-col">
-              <div className="p-6 border-b border-slate/30">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-purple/20 rounded-xl flex items-center justify-center"><Wand2 className="w-5 h-5 text-purpleLight" /></div>
-                    <div>
-                      <h2 className="text-xl font-display text-textPrimary">AI 自动生成</h2>
-                      <p className="text-xs text-textMuted">为《{currentProject.title}》生成完整的场次大纲</p>
-                    </div>
+      {showOutlinePanel && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowOutlinePanel(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl max-h-[85vh] bg-midnightLight rounded-xl border border-slate/30 flex flex-col">
+            <div className="p-6 border-b border-slate/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple/20 rounded-xl flex items-center justify-center"><Wand2 className="w-5 h-5 text-purpleLight" /></div>
+                  <div>
+                    <h2 className="text-xl font-display text-textPrimary">AI 自动生成</h2>
+                    <p className="text-xs text-textMuted">为《{currentProject.title}》生成完整的场次大纲</p>
                   </div>
-                  <button onClick={() => setShowOutlinePanel(false)} className="text-textMuted hover:text-textPrimary p-2">✕</button>
                 </div>
+                <button onClick={() => setShowOutlinePanel(false)} className="text-textMuted hover:text-textPrimary p-2">✕</button>
               </div>
+            </div>
 
               <div className="flex-1 overflow-y-auto p-6">
                 {!isGenerating && outlineScenes.length === 0 && !generatingStatus && (
@@ -550,10 +551,9 @@ const Editor = () => {
                   </div>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
 
       {/* Create scene modal */}
       {showCreateSceneModal && (
