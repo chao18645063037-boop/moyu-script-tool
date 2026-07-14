@@ -38,6 +38,8 @@ const Dashboard = () => {
   const [selectedGenre, setSelectedGenre] = useState<Genre>('commercial');
   const [selectedStructure, setSelectedStructure] = useState<Structure>('three_act');
   const [plotSuggestions, setPlotSuggestions] = useState<PlotSuggestion[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { projects, currentProject } = useSelector((state: RootState) => state.projects);
@@ -53,11 +55,24 @@ const Dashboard = () => {
   }, [currentProject]);
 
   const handleCreateProject = async () => {
-    if (!newProjectTitle.trim()) return;
-    const result = await dispatch(createProject({ title: newProjectTitle, genre: selectedGenre, structure: selectedStructure }));
-    if (createProject.fulfilled.match(result)) {
-      setShowCreateModal(false);
-      setNewProjectTitle('');
+    const title = newProjectTitle.trim();
+    if (!title) return;
+    setIsCreating(true);
+    setCreateError('');
+    try {
+      const result = await dispatch(createProject({ title, genre: selectedGenre, structure: selectedStructure }));
+      if (createProject.fulfilled.match(result)) {
+        setShowCreateModal(false);
+        setNewProjectTitle('');
+        setSelectedGenre('commercial');
+        setSelectedStructure('three_act');
+      } else {
+        setCreateError((result.payload as string) || '创建失败');
+      }
+    } catch {
+      setCreateError('创建失败，请重试');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -255,14 +270,12 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={() => setShowCreateModal(false)}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-md bg-midnightLight rounded-xl p-6 border border-slate/30"
           >
@@ -317,18 +330,25 @@ const Dashboard = () => {
 
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => setShowCreateModal(false)}
+                onClick={() => { setShowCreateModal(false); setCreateError(''); }}
                 className="btn-secondary flex-1"
+                disabled={isCreating}
               >
                 取消
               </button>
               <button
                 onClick={handleCreateProject}
-                className="btn-primary flex-1"
+                disabled={isCreating || !newProjectTitle.trim()}
+                className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                创建
+                {isCreating && <div className="w-4 h-4 border-2 border-midnight/30 border-t-midnight rounded-full animate-spin" />}
+                {isCreating ? '创建中...' : '创建'}
               </button>
             </div>
+
+            {createError && (
+              <p className="mt-3 text-sm text-red-400 text-center">{createError}</p>
+            )}
           </motion.div>
         </motion.div>
       )}
